@@ -40,13 +40,9 @@ post  '/aircon1f'  do
   p params
   
   power= ( params[:power]=="true"?true:false)
-p power                           
   ac_1f.set_power power
-  if power
-    val=params[:set_temperature].to_i
-    p  val
-    ac_1f.set_temp  val
-  end
+  val=params[:set_temperature].to_i
+  ac_1f.set_temp  val
   ac_1f.send_command
   haml :ok
 end
@@ -59,13 +55,9 @@ post  '/aircon2f'  do
   p params
   
   power= ( params[:power]=="true"?true:false)
-p power                                                      
   ac_2f.set_power power
-  if power 
-    val =params[:set_temperature].to_i
-    p  val
-    ac_2f.set_temp  val
-  end
+  val =params[:set_temperature].to_i
+  ac_2f.set_temp  val
   ac_2f.send_command
   haml :ok
 end
