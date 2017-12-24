@@ -67,7 +67,12 @@ __END__
 @@ style
 h1
   margin-top: 1em
-  font-size: 16px
+  font-size: 16pt
+  text-align: left
+
+h2
+  margin-top: 1em
+  font-size: 12pt
   text-align: left
 
 li
@@ -75,8 +80,13 @@ li
     size: 1em
 
 contents
-  margin: 2em,2em,2em,2em
+  margin: 2px 2px 2px 2px
 
+#foot
+  margin: 20px 20px 20px 20px
+
+
+  
 @@ layout
 !!! XML
 !!! Strict
@@ -95,12 +105,12 @@ contents
       != yield
 
 @@ ok
-%h1 remote air web
+%h1 remote air web --#{Time.now}--
 %h2 send command ok
 %a{ href: '/' } jump to status 
 
 @@ index
-%h1 remote air web
+%h1 remote air web --#{Time.now}--
 %h2 1f
 %form{ :action => "/aircon1f" , :method => "post" }
   %ul
@@ -148,5 +158,5 @@ contents
   %input{:type => "submit", :value => "send"}
       
 
-
-%a{ href: '/' } reload
+%div#foot
+  %a{ href: '/' } reload
