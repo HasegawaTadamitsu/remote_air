@@ -3,7 +3,8 @@ require 'sinatra'
 require 'haml'
 require 'sass'
 require 'sinatra/reloader'
-require './Airconditioner.rb'
+require './AirConditioner.rb'
+require './AirCleaner.rb'
 
 set :port, 4568
 set :bind, '0.0.0.0'
@@ -19,46 +20,43 @@ end
 
 
 get '/' do
-  aircon_eoj_1F = BEOJ.new
-  aircon_eoj_1F.set_values 0x01,0x30,0x04
-  ac_1f = Airconditioner.new  "192.168.33.111",aircon_eoj_1F
-  @aircon1f_status = ac_1f.get_status
+  tmp = AirConditioner.new  "192.168.33.111", [ 0x01, 0x30, 0x04]
+  @aircon1f_status = tmp.get_status
 
+  tmp = AirConditioner.new  "192.168.33.111", [0x01, 0x30, 0x03]
+  @aircon2f_status = tmp.get_status
 
-  aircon_eoj_2F = BEOJ.new
-  aircon_eoj_2F.set_values 0x01,0x30,0x03
-  ac_2f = Airconditioner.new  "192.168.33.111",aircon_eoj_2F
-  @aircon2f_status = ac_2f.get_status
+  tmp = AirCleaner.new  "192.168.33.126", [ 0x01, 0x35, 0x01]
+  @airclean2f_status =tmp.get_status
+
   haml :index
 end
 
 post  '/aircon1f'  do
-  aircon_eoj_1F = BEOJ.new
-  aircon_eoj_1F.set_values 0x01,0x30,0x04
-  ac_1f = Airconditioner.new  "192.168.33.111",aircon_eoj_1F
-  ac_1f.init_send
-  p params
-  
+  tmp = AirConditioner.new  "192.168.33.111",[ 0x01, 0x30, 0x04]
   power= ( params[:power]=="true"?true:false)
-  ac_1f.set_power power
+  tmp.set_power power
   val=params[:set_temperature].to_i
-  ac_1f.set_temp  val
-  ac_1f.send_command
+  tmp.set_temp  val
+  tmp.send
   haml :ok
 end
 
 post  '/aircon2f'  do
-  aircon_eoj_2F = BEOJ.new
-  aircon_eoj_2F.set_values 0x01,0x30,0x03
-  ac_2f = Airconditioner.new  "192.168.33.111",aircon_eoj_2F
-  ac_2f.init_send
-  p params
-  
+  tmp = AirConditioner.new  "192.168.33.111",[0x01, 0x30, 0x03]
   power= ( params[:power]=="true"?true:false)
-  ac_2f.set_power power
-  val =params[:set_temperature].to_i
-  ac_2f.set_temp  val
-  ac_2f.send_command
+  tmp.set_power power
+  val=params[:set_temperature].to_i
+  tmp.set_temp  val
+  tmp.send
+  haml :ok
+end
+
+post  '/aircleaner2f'  do
+  tmp = AirCleaner.new  "192.168.33.126", [0x01, 0x35, 0x01]
+  power= ( params[:power]=="true"?true:false)
+  tmp.set_power power
+  tmp.send
   haml :ok
 end
 
@@ -111,7 +109,7 @@ contents
 
 @@ index
 %h1 remote air web --#{Time.now}--
-%h2 1f
+%h2 1f aircon
 %form{ :action => "/aircon1f" , :method => "post" }
   %ul
     %li 
@@ -133,7 +131,7 @@ contents
       outside_temperature #{@aircon1f_status[:outside_temperature]} deg C
   %input{:type => "submit", :value => "send"}
         
-%h2 2f
+%h2 2f aircon
 %form{ :action => "/aircon2f" , :method => "post" }
   %ul
     %li 
@@ -156,7 +154,24 @@ contents
       outside_temperature #{@aircon2f_status[:outside_temperature]} deg C
 
   %input{:type => "submit", :value => "send"}
-      
+
+%h2 2f aircleaner
+%form{ :action => "/aircleaner2f" , :method => "post" }
+  %ul
+    %li 
+      Power 
+      #{@airclean2f_status[:power]}
+      %select{ :name => 'power' }
+        %option{ :value => 'true' ,  :selected => (@airclean2f_status[:power]  ) } ON
+        %option{ :value => 'fasle' , :selected => (! @airclean2f_status[:power] ) } off
+    %li
+      AirFlowRateSetting #{@airclean2f_status[:flowRate]}
+    %li
+      AirPollutionDetectionStatus #{@airclean2f_status[:pollution]}
+
+  %input{:type => "submit", :value => "send"}
+
+  
 
 %div#foot
   %a{ href: '/' } reload
